@@ -6,5 +6,10 @@ from .food_write import food_write
 from .canteen_zeroize_buttons import canteen_zeroize_buttons
 from .confirm_choice_buttons import confirm_choice_buttons
 from .register_tiacher_in_class_buttons import made_bos_in_class
-from .exit import exit_panel
+from .exit import *
 from .canteen_notice_buttons import canteen_notise_panel
+from .canteen_notice_details_buttons import canteen_notise_ditails_panel
+from .canteen_quantity_all import canteen_quantity_all_panel
+from .exit_from_food import exit_from_food_panel
+from .help_for_table import help_for_table_button
+from .url_google_table import url_google_table_button

@@ -9,7 +9,11 @@ from .register_student import dp
 from .register_canteen_bos import dp
 from .show_school import dp
 from .canteen import dp
+from .canteen_table import dp
 from .show_class import dp
+from .show_students import dp
+from .mailing import dp
+from .exit import dp
 from .echo import dp
 
 __all__ = ["dp"]

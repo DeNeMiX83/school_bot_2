@@ -1,5 +1,6 @@
 import os
 
+import pymorphy2
 from dotenv import load_dotenv
 
 from sqlite import cur
@@ -16,22 +17,15 @@ admins = [
 ]
 
 admin_id_list = [user[0] for user in cur.execute('''SELECT user_id FROM users WHERE role = ?''',
-                                            [admin_role])]
+                                                 [admin_role])]
 director_id_list = [user[0] for user in cur.execute('''SELECT user_id FROM users WHERE role = ?''',
-                                               [director_role])]
+                                                    [director_role])]
+classroom_teacher_id_list = [user[0] for user in cur.execute('''SELECT bos FROM classes''')]
+
 teacher_id_list = [user[0] for user in cur.execute('''SELECT user_id FROM users WHERE role = ?''',
-                                              [teacher_role])]
+                                                   [teacher_role])]
 student_id_list = [user[0] for user in cur.execute('''SELECT user_id FROM users WHERE role = ?''',
-                                              [student_role])]
-print(admin_id_list, director_id_list, teacher_id_list, student_id_list)
-ip = os.getenv("ip")
+                                                   [student_role])]
+print('Бот запущен')
 
-
-aiogram_redis = {
-    'host': ip,
-}
-
-redis = {
-    'address': (ip, 6379),
-    'encoding': 'utf8'
-}
+morph = pymorphy2.MorphAnalyzer()

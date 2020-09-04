@@ -2,29 +2,39 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from data.config import admin_role, director_role, teacher_role, student_role, admin_id_list, \
-    director_id_list, teacher_id_list, student_id_list
+from data.config import admin_role, director_role, teacher_role, student_role, classroom_teacher_id_list
+from funcs.all_funcs import is_classroom_teacher
 from keyboards.default import not_role_panel, director_panel, teacher_panel, student_panel, \
     admin_panel
 from loader import dp
 from sqlite import cur
+from states.show_students_state import ShowStudents
 from utils.misc import rate_limit
-
-
-@dp.callback_query_handler(text='exit_inline_message', state='*')
-async def exit_(call: CallbackQuery, state: FSMContext):
-    await call.answer(cache_time=5)
-    data = await state.get_data()
-    await call.message.delete()
-    await state.finish()
-    start_panel = data.get('start_panel')
-    if start_panel:
-        await call.message.answer(text='Хорошо',
-                                  reply_markup=start_panel)
 
 
 @dp.message_handler(text='Выйти', state=[None, '*'])
 async def exit(msg: Message, state: FSMContext):
+    print(f'{msg.from_user.full_name} нажал выйти через кейборд кнопку')
+    panel = await get_user_panel(msg)
+    await msg.answer(text='Хорошо', reply_markup=panel)
+    await state.finish()
+
+
+@rate_limit(1)
+@dp.message_handler(state='*')
+async def bot_echo(message: types.Message, state: FSMContext):
+    panel = await get_user_panel(message)
+    await message.answer('Я не знаю что ты пишешь', reply_markup=panel)
+    await state.finish()
+
+
+@dp.callback_query_handler(state='*')
+async def call_echo(call: CallbackQuery):
+    await call.message.answer('Я не могу выполнить эту команду')
+    await call.message.delete()
+
+
+async def get_user_panel(msg):
     user_id = msg.from_user.id
     try:
         role = cur.execute('''SELECT role FROM users WHERE user_id = ?''', [user_id]).fetchone()[0]
@@ -39,14 +49,9 @@ async def exit(msg: Message, state: FSMContext):
     elif role == director_role:
         panel = director_panel
     elif role == teacher_role:
-        panel = teacher_panel
+        panel = teacher_panel()
+        if await is_classroom_teacher(msg):
+            panel = teacher_panel(True)
     elif role == student_role:
         panel = student_panel
-    await msg.answer(text='Хорошо', reply_markup=panel)
-    await state.finish()
-
-
-@rate_limit(3)
-@dp.message_handler()
-async def bot_echo(message: types.Message, state: FSMContext):
-    await message.answer('Я не знаю что ты пишешь')
+    return panel

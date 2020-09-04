@@ -3,12 +3,15 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 canteen_panel = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text='Что дают'),
-            KeyboardButton(text='Записаться')
+            KeyboardButton(text='Записать еду🍱'),
+            KeyboardButton(text='Записаться🖋')
         ],
         [
-            KeyboardButton(text='Отметить'),
-            KeyboardButton(text='Суммы')
+            KeyboardButton(text='Отметить📝'),
+            KeyboardButton(text='Суммы💰')
+        ],
+        [
+            KeyboardButton(text='Таблицы📅')
         ],
         [
             KeyboardButton(text='Выйти')

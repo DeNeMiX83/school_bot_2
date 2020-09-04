@@ -6,3 +6,4 @@ from .register_student_state import RegisterStudent
 from .write_food import WriteFood
 from .school_state import ShowSchool
 from .class_state import ShowClass
+from .mailing_state import Mailing
