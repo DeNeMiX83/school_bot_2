@@ -1,5 +1,6 @@
 import csv
 
+from xlsxwriter import Workbook
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, CallbackQuery
 from data.config import student_role
@@ -22,6 +23,15 @@ async def csv_writer(data, path):
             writer.writerow(line)
 
 
+async def xls_writer(data, path, month):
+    workbook = Workbook(path)
+    worksheet = workbook.add_worksheet(month)
+    for row, line in enumerate(data):
+        for col, item in enumerate(line):
+            worksheet.write(row, col, item)
+    workbook.close()
+
+
 async def get_data_for_table(msg, month, school_id, class_id):
     days = cur.execute('''SELECT day FROM days WHERE month = ? and class = ?''',
                        [month, class_id]).fetchall()
@@ -33,10 +43,9 @@ async def get_data_for_table(msg, month, school_id, class_id):
     for day in days:
         data.append([day[0]])
     for user_id, name in users:
-        name = give_emoji_free_text(name)
+        #name = give_emoji_free_text(name)
         data[0].append(name)
         choices = await get_choice(month, user_id)
-        print(choices)
         for i, day in enumerate(days):
             data[i + 1].append(choices.get(day[0], '-'))
     data[0].append('Еда')
@@ -45,7 +54,6 @@ async def get_data_for_table(msg, month, school_id, class_id):
         food, price = info
         data[i + 1].append(food)
         data[i + 1].append(price)
-    print(data)
     return data
 
 
@@ -90,8 +98,8 @@ async def create_table_func(msg: Message):
         await msg.answer(text='Нет информации за этот месяц')
         return
     await msg.answer(text='Хорошо')
-    path = f'canteen\\{MONTH[month - 1]}({school_id}_{class_id}).csv'
-    await csv_writer(data, path)
+    path = f'canteen/{MONTH[month - 1]}({school_id}_{class_id}).xlsx'
+    await xls_writer(data, path, MONTH[month - 1])
     with open(path, 'rb') as file:
         await bot.send_document(chat_id=msg.from_user.id,
                                 document=file,

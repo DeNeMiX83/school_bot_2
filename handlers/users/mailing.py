@@ -26,10 +26,14 @@ async def mailing_func(msg: Message):
 @dp.message_handler(is_teacher, text_contains='Класс', state=Mailing.Start)
 async def mailing_classroom(msg: Message, state: FSMContext):
     text = msg.text
-    print(text, 0)
-    a = search(r'\d\d\w', text)
-    print(a[0] if a else 'not', 0)
-    class_name = ''.join(filter(lambda x: x.isdigit(), msg.text))
+    class_name = search(r'\d{2}\w', text)
+    if not class_name:
+        class_name = search(r'\d{2}', text)
+    if not class_name:
+        class_name = search(r'\d\w', text)
+    if not class_name:
+        class_name = search(r'\d', text)
+    class_name = class_name[0]
     print(f'{msg.from_user.full_name} учитель выбрал класс для рассылки: {class_name}')
     await state.update_data(class_name=class_name)
     await msg.answer(f'Класс: {class_name}'
@@ -40,9 +44,12 @@ async def mailing_classroom(msg: Message, state: FSMContext):
 @dp.message_handler(state=Mailing.Write)
 async def text(msg: Message, state: FSMContext):
     text = msg.text
+    data = await state.get_data()
+    class_name = data['class_name']
     print(f'{msg.from_user.full_name} учитель выбрал класс для рассылки с текстом: {text}')
     user_id = msg.from_user.id
-    class_id = await classroom_teacher_class_id(msg)
+    class_id = cur.execute('SELECT id FROM classes WHERE name = ?',
+                           [class_name]).fetchone()[0]
     teacher_name = cur.execute('''SELECT u.name 
                                 FROM users u
                                 LEFT JOIN teachers t ON t.user = u.user_id WHERE u.user_id = ?''',
@@ -52,4 +59,4 @@ async def text(msg: Message, state: FSMContext):
         await bot.send_message(chat_id=id[0], text=f'Сообщение от учителя: {teacher_name}'
                                                    f'\n➡️{text}')
     await msg.answer(text='♻️Сообщение отправлено♻️')
-    await state.finish()
+    await Mailing.Start.set()

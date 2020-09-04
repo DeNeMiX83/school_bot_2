@@ -18,8 +18,6 @@ import datetime as dt
 
 canteen_data = {}
 
-logging.basicConfig(filename="canteen.log", level=logging.INFO)
-
 
 @rate_limit(3)
 @dp.message_handler(Text(equals=['Столовая🥣']), is_student)
@@ -378,7 +376,6 @@ async def canteen_summ(msg, class_id, food):
 
 
 async def take_food(msg, class_id):
-    print(canteen_data)
     try:
         food = canteen_data[class_id]['food']
         return food
