@@ -6,7 +6,6 @@ from aiogram.types import Message, CallbackQuery
 from data.config import student_role
 from funcs.all_funcs import is_student, student_class_id, give_emoji_free_text
 from keyboards.default import month_of_year_panel
-from keyboards.inline import help_for_table_button, url_google_table_button
 from loader import dp, bot
 from sqlite import cur
 
@@ -97,19 +96,9 @@ async def create_table_func(msg: Message):
     if len(data) == 1:
         await msg.answer(text='Нет информации за этот месяц')
         return
-    await msg.answer(text='Хорошо')
+    await msg.answer(text='Лови таблицу🧮')
     path = f'canteen/{MONTH[month - 1]}({school_id}_{class_id}).xlsx'
     await xls_writer(data, path, MONTH[month - 1])
     with open(path, 'rb') as file:
         await bot.send_document(chat_id=msg.from_user.id,
-                                document=file,
-                                reply_markup=help_for_table_button)
-
-
-@dp.callback_query_handler(is_student, text='help_for_table')
-async def helf_for_table_func(call: CallbackQuery):
-    await call.answer(cache_time=5)
-    await call.message.answer(text='Если у вас не правильно открывается таблица '
-                                   'и колонки в ней спутаны, предлагаю открыть этот файл в '
-                                   'google таблицах через компьютер',
-                              reply_markup=url_google_table_button)
+                                document=file)
