@@ -1,4 +1,4 @@
 from sqlite3 import connect
 
-con = connect('school.db')
+con = connect('sqlite/school.db')
 cur = con.cursor()
