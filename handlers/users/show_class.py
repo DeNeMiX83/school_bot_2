@@ -1,7 +1,7 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message
-from funcs.all_funcs import correct_user, is_director, check_school_id
+from funcs.all_funcs import correct_user, is_director, check_school_id, get_class_name
 from keyboards.default import show_classes_buttons, director_panel, class_information
 from loader import dp, bot
 from sqlite import cur, con
@@ -19,8 +19,9 @@ async def text(msg: Message, state: FSMContext):
 
 @dp.message_handler(is_director, text_contains='Класс')
 async def text(msg: Message, state: FSMContext):
+    text = msg.text
     user_id = msg.from_user.id
-    class_name = ''.join(filter(lambda x: x.isdigit(), msg.text))
+    class_name = get_class_name(text)
     school_id = cur.execute('''SELECT school FROM users WHERE user_id = ?''', [user_id]).fetchone()[0]
     print(f'{msg.from_user.full_name} зашел в {class_name} класс')
     await state.update_data(school_id=school_id,

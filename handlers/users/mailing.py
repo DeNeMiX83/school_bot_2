@@ -3,7 +3,7 @@ from re import search
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
-from funcs.all_funcs import is_teacher, check_school_id, classroom_teacher_class_id
+from funcs.all_funcs import is_teacher, check_school_id, classroom_teacher_class_id, get_class_name
 from keyboards.default import show_classes_buttons
 from keyboards.inline import exit_panel
 from loader import dp, bot
@@ -26,14 +26,7 @@ async def mailing_func(msg: Message):
 @dp.message_handler(is_teacher, text_contains='Класс', state=Mailing.Start)
 async def mailing_classroom(msg: Message, state: FSMContext):
     text = msg.text
-    class_name = search(r'\d{2}\w', text)
-    if not class_name:
-        class_name = search(r'\d{2}', text)
-    if not class_name:
-        class_name = search(r'\d\w', text)
-    if not class_name:
-        class_name = search(r'\d', text)
-    class_name = class_name[0]
+    class_name = get_class_name(text)
     print(f'{msg.from_user.full_name} учитель выбрал класс для рассылки: {class_name}')
     await state.update_data(class_name=class_name)
     await msg.answer(f'Класс: {class_name}'

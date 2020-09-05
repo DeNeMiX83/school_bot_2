@@ -25,6 +25,8 @@ async def exit(msg: Message, state: FSMContext):
 async def bot_echo(message: types.Message, state: FSMContext):
     panel = await get_user_panel(message)
     await message.answer('Я не знаю что ты пишешь', reply_markup=panel)
+    state_name = await state.get_state()
+    print(state_name)
     await state.finish()
 
 

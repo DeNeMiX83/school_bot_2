@@ -14,7 +14,7 @@ async def class_information(msg, school_id, class_name):
         button = KeyboardButton(text='Убрать кл. рук.')
     panel.add(button,
               KeyboardButton(text='Удалить класс'))
-    panel.add(KeyboardButton(text='Выйти'), KeyboardButton(text='Рассылка'))
+    panel.add(KeyboardButton(text='Выйти'), KeyboardButton(text='Переименовать'))
     await msg.answer(text='Классный руководитль: '
                           f'\n{bos}',
                      reply_markup=panel)
