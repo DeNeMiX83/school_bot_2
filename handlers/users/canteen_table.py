@@ -37,8 +37,8 @@ async def get_data_for_table(msg, month, school_id, class_id):
     users = cur.execute('''SELECT u.user_id, u.name FROM canteen_journal c
                             LEFT JOIN days d ON c.day = d.id
                             LEFT JOIN users u ON c.user = u.user_id
-                            WHERE d.month = ? and d.class = ?''',
-                          [month, class_id]).fetchall()
+                            WHERE d.month = ?''',
+                          [month]).fetchall()
     users = set(users)
     foods = await get_food(month, class_id)
     data = list()
