@@ -117,11 +117,13 @@ async def food_price_func(msg: Message, state: FSMContext):
     price = msg.text
     user_id = msg.from_user.id
     print(f'{msg.from_user.full_name} роль: ученик, id: {user_id} ввел цену блюда: {price}')
-    if not price.isdigit():
+    try:
+        price = float(msg.text)
+    except Exception as e:
         await msg.answer(text='Напишите корректные цифры')
         return
     data = await state.get_data()
-    data['Цена'] = int(price)
+    data['Цена'] = price
     await state.update_data(data)
     await save_food(msg, state)
     await state.set_state(None)
