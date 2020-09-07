@@ -9,5 +9,9 @@ async def other_choice(buttons, data, type_=''):
                                      callback_data=answer.new(type=type_, answer=button))
                 for button in buttons))
     panel.add(
-        InlineKeyboardButton(text='сохранить', callback_data=answer.new(type=type_, answer='save')))
+        InlineKeyboardButton(text='сохранить',
+                             callback_data=answer.new(type=type_, answer='save')),
+        InlineKeyboardButton(text='Отмена',
+                             callback_data='canteen_write_food_exit')
+    )
     return panel

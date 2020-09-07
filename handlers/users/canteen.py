@@ -7,7 +7,7 @@ from data.config import morph
 from funcs.all_funcs import student_class_id, is_student, check_school_id
 from keyboards.inline import other_choice, food_write, canteen_zeroize_buttons, \
     confirm_choice_buttons, exit_panel, canteen_notise_panel, canteen_notise_ditails_panel, \
-    canteen_quantity_all_panel, exit_from_food_panel
+    canteen_quantity_all_panel, exit_from_food_panel, exit_from_inline
 from keyboards.inline.callback_datas import answer, confirm_choice
 from sqlite import cur, con
 from keyboards.default import canteen_panel
@@ -54,11 +54,11 @@ async def food(msg: Message):
 
 
 @dp.callback_query_handler(text='canteen_write_food_exit',
-                           state=[WriteFood.Quantity, WriteFood.Name, WriteFood.Price])
+                           state=[WriteFood.Quantity, WriteFood.Name, WriteFood.Price, None])
 async def write_food_exit_func(call: CallbackQuery, state: FSMContext):
     user_id = call.from_user.id
     print(f'{call.from_user.full_name} роль: ученик, id: {user_id} вышел из что дают')
-    await call.message.answer(text='Отменена регистрация еды на сегодня')
+    await call.message.answer(text='Выполнена отменена регистрация еды')
     await call.message.delete()
     await state.finish()
     await register_class_in_canteen(call)
@@ -184,9 +184,6 @@ async def write(msg: Message):
     print(canteen_data)
     if not food or food == 'write':
         await msg.answer(text='Блюдо не добавлено')
-        print(
-            f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел записаться, но блюдо не было добавлено'
-            f'{canteen_data}')
         return
     await msg.answer(text=f'🥘Блюдо: {food[0]}'
                           f'\n💶Цена: {food[1]}',
@@ -219,8 +216,7 @@ async def food_note_func(msg: Message):
     user_id = msg.from_user.id
     if not food or food == 'write':
         await msg.answer(text='Блюдо не добавлено')
-        print(f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел отметить, но блюдо не было добавлено'
-              f'{canteen_data}')
+        print(f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел отметить, но блюдо не было добавлено')
         return
     quantity_now = len(canteen_data[class_id]['who'])
     quantity = canteen_data[class_id]['quantity']
