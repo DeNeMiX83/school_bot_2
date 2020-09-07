@@ -180,8 +180,13 @@ async def write(msg: Message):
     print(f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел записаться')
     class_id = await student_class_id(msg)
     food = await take_food(msg, class_id)
+    print('еда в записаться', food)
+    print(canteen_data)
     if not food or food == 'write':
         await msg.answer(text='Блюдо не добавлено')
+        print(
+            f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел записаться, но блюдо не было добавлено'
+            f'{canteen_data}')
         return
     await msg.answer(text=f'🥘Блюдо: {food[0]}'
                           f'\n💶Цена: {food[1]}',
@@ -214,7 +219,8 @@ async def food_note_func(msg: Message):
     user_id = msg.from_user.id
     if not food or food == 'write':
         await msg.answer(text='Блюдо не добавлено')
-        print(f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел отметить, но блюдо не было добавлено')
+        print(f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел отметить, но блюдо не было добавлено'
+              f'{canteen_data}')
         return
     quantity_now = len(canteen_data[class_id]['who'])
     quantity = canteen_data[class_id]['quantity']
@@ -252,7 +258,7 @@ async def canteen_notify_stay_people_func(call: CallbackQuery, state):
     class_id = await student_class_id(call)
     people = await stay_people_id(class_id)
     for id in people:
-        await bot.send_message(chat_id=id, text='Вы забыли отметиться')
+        await bot.send_message(chat_id=id, text='Вы забыли записаться')
 
 
 @dp.callback_query_handler(text='canteen_notice')  # подтверждение отмечания
@@ -389,5 +395,6 @@ async def take_food(msg, class_id):
 
 async def register_class_in_canteen(msg):
     class_id = await student_class_id(msg)
-    canteen_data[class_id] = {'food': [], 'who': {}, 'quantity': 0}
+    if class_id not in canteen_data:
+        canteen_data[class_id] = {'food': [], 'who': {}, 'quantity': 0}
 
