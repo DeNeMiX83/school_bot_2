@@ -19,7 +19,6 @@ import datetime as dt
 canteen_data = {}
 
 
-@rate_limit(3)
 @dp.message_handler(Text(equals=['Столовая🥣']), is_student)
 async def canteen(msg: Message):
     user_id = msg.from_user.id
@@ -81,7 +80,6 @@ async def price_food(msg: Message, state: FSMContext):
     try:
         quantity = int(msg.text)
     except Exception as e:
-        print(e)
         await msg.answer(text='Напишите корректные цифры', reply_markup=exit_from_food_panel)
         return
     students_q = len(cur.execute('SELECT user FROM students WHERE class = ?', [class_id]).fetchall())
@@ -166,10 +164,13 @@ async def different_answer(call: CallbackQuery, callback_data: dict, state: FSMC
         people = cur.execute('''SELECT user FROM students WHERE class = ?''', [class_id]).fetchall()
         people = map(lambda id: id[0], people)
         for user_id in people:
-            await bot.send_message(chat_id=user_id,
-                                   text='Блюдо добавлено'
+            try:
+                await bot.send_message(chat_id=user_id,
+                                       text='Блюдо добавлено'
                                         '\n------------------------------'
                                         '\nИдите записаться😋')
+            except Exception:
+                pass
         await state.finish()
 
 
@@ -180,8 +181,6 @@ async def write(msg: Message):
     print(f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел записаться')
     class_id = await student_class_id(msg)
     food = await take_food(msg, class_id)
-    print('еда в записаться', food)
-    print(canteen_data)
     if not food or food == 'write':
         await msg.answer(text='Блюдо не добавлено')
         return
@@ -362,16 +361,16 @@ async def canteen_summ(msg, class_id, food):
         elif choice == '-':
             free += 1
         await write_choice_in_db(people_id, choice)
+    for people_id in canteen_data[class_id]['who'].keys():
+        await bot.send_message(chat_id=people_id,
+                                text='⬇️Получилось⬇️'
+                              '\n-----------------------------'
+                              f'\n💵Платно: {paid}'
+                              f'\n💸Бесплатно: {free}')
     class_id = await student_class_id(msg)
     for id in await stay_people_id(class_id):
         await write_choice_in_db(id, '-')
     con.commit()
-    if isinstance(msg, CallbackQuery):
-        msg = msg.message
-    await msg.answer(text='⬇️Получилось⬇️'
-                          '\n-----------------------------'
-                          f'\n💵Платно: {paid}'
-                          f'\n💸Бесплатно: {free}')
     try:
         del canteen_data[class_id]
         print('блюдо удалено')

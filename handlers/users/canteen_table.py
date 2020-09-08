@@ -8,6 +8,7 @@ from funcs.all_funcs import is_student, student_class_id, give_emoji_free_text
 from keyboards.default import month_of_year_panel
 from loader import dp, bot
 from sqlite import cur
+from utils.misc import rate_limit
 
 MONTH = ['Январь', 'Февраль', 'Март',
          'Апрель', 'Май', 'Июнь',
@@ -86,6 +87,7 @@ async def table_func(msg: Message):
     print(f'{msg.from_user.full_name} роль: ученик, id: {user_id} зашел в таблицы')
 
 
+rate_limit(4)
 @dp.message_handler(Text(equals=MONTH), is_student)  # кнопка
 async def create_table_func(msg: Message):
     text = msg.text

@@ -6,6 +6,8 @@ from aiogram.dispatcher.handler import CancelHandler, current_handler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.utils.exceptions import Throttled
 
+from data.config import morph
+
 
 class ThrottlingMiddleware(BaseMiddleware):
     """
@@ -42,7 +44,11 @@ class ThrottlingMiddleware(BaseMiddleware):
             key = f"{self.prefix}_message"
         delta = throttled.rate - throttled.delta
         if throttled.exceeded_count <= 2:
-            await message.reply('Много обращений, отдохните')
+            seconds = round(delta)
+            comment = morph.parse('секунда')[0]
+            word = comment.make_agree_with_number(seconds).word
+            await message.reply(f'Много обращений\n'
+                                f'Ожидайте {seconds} {word}')
         await asyncio.sleep(delta)
         thr = await dispatcher.check_key(key)
         if thr.exceeded_count == throttled.exceeded_count:
