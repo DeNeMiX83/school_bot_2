@@ -1,4 +1,4 @@
-async def on_startup( dp):
+async def on_startup(dp):
     import logging
     logging.basicConfig(level=logging.INFO)
     import filters
