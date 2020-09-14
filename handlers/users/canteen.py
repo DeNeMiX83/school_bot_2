@@ -1,4 +1,4 @@
-import logging
+
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, CallbackQuery
@@ -29,7 +29,7 @@ async def canteen(msg: Message):
 
 @rate_limit(2)
 @dp.message_handler(Text(equals=['Записать еду🍱']), is_student)  # кнопка
-async def food(msg: Message):
+async def food(msg: Message, state: FSMContext):
     class_id = await student_class_id(msg)
     food = await take_food(msg, class_id)
     user_id = msg.from_user.id
@@ -41,14 +41,22 @@ async def food(msg: Message):
     if new_day:  # если сегодня запись есть то отмечаться заного не надо
         await msg.answer(text='Вы сегодня отмечались')
         return
-    if len(food) == 2:
+    if isinstance(food, FSMContext):
+        try:
+            canteen_bos_id = cur.execute('''SELECT canteen FROM classes WHERE id = ?''',
+                                  [class_id]).fetchone()[0]
+        except Exception as e:
+            print(e)
+            canteen_bos_id = None
+        await msg.answer(text='Данные заполняются другим пользователем',
+                         reply_markup=exit_from_food_panel if user_id == canteen_bos_id else None)
+        return
+    elif len(food) == 2:
         await msg.answer(text='Данные на сегодня внесены')
         return
-    elif food == 'write':
-        await msg.answer(text='Данные заполняются другим пользователем')
-        return
-    canteen_data[class_id]['food'] = 'write'
-    await msg.answer('Напишите количество учеников в классе или нажмите все', reply_markup=canteen_quantity_all_panel)
+    canteen_data[class_id]['food'] = state
+    await msg.answer('Напишите количество учеников в классе или нажмите все',
+                     reply_markup=canteen_quantity_all_panel)
     await WriteFood.Quantity.set()
 
 
@@ -56,11 +64,15 @@ async def food(msg: Message):
                            state=[WriteFood.Quantity, WriteFood.Name, WriteFood.Price, None])
 async def write_food_exit_func(call: CallbackQuery, state: FSMContext):
     user_id = call.from_user.id
+    class_id = await student_class_id(call)
+    who = await take_food(call, class_id)
+    if isinstance(who, FSMContext):
+        await who.finish()
+    canteen_data[class_id]['food'] = []
     print(f'{call.from_user.full_name} роль: ученик, id: {user_id} вышел из что дают')
     await call.message.answer(text='Выполнена отменена регистрация еды')
     await call.message.delete()
     await state.finish()
-    await register_class_in_canteen(call)
 
 
 @dp.callback_query_handler(text='canteen_quantity_all', state=WriteFood.Quantity)

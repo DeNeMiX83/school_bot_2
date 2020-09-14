@@ -14,11 +14,11 @@ async def exit_panel(where='all'):
 
 
 async def exit_panel_button_func(where='all'):
-    exit_panel_button = InlineKeyboardButton(text='Выйти', callback_data=exit_from_inline.new(
+    exit_panel_button = InlineKeyboardButton(text='Отмена', callback_data=exit_from_inline.new(
         where=where))
     return exit_panel_button
 
 
-exit_panel_button = InlineKeyboardButton(text='Выйти', callback_data=exit_from_inline.new(
+exit_panel_button = InlineKeyboardButton(text='Отмена', callback_data=exit_from_inline.new(
         where='all'))
 
